@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,28 +39,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.ui.presentation.navigation.Destination
-
-
-@Composable
-fun ProductoCategoria(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFD9FC3)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Header(navController = navController)
-        Spacer(modifier = Modifier.height(16.dp))
-        ProductList()
-    }
-}
+import com.ucne.glamourmarket.ui.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
 
 @Composable
 fun Header(navController: NavController) {
@@ -70,7 +58,6 @@ fun Header(navController: NavController) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Aquí puedes agregar un icono para el menú si lo deseas
         Icon(
             imageVector = Icons.Default.ExitToApp,
             contentDescription = "Salir del usuario",
@@ -87,7 +74,6 @@ fun Header(navController: NavController) {
                 .clickable { navController.navigate(Destination.Home.route) }
         )
 
-        // Aquí puedes agregar un icono para el carrito si lo deseas
         Icon(
             imageVector = Icons.Default.ShoppingCart,
             contentDescription = "Cart",
@@ -100,28 +86,42 @@ fun Header(navController: NavController) {
 }
 
 @Composable
-fun ProductList() {
+fun ProductoCategoria(navController: NavController, viewModel: ProductoCategoriaViewModel = hiltViewModel(), categoriaSeleccionada: String) {
+    viewModel.cargarProductosPorCategoria(categoriaSeleccionada)
+    val listaProductosByCategoria by viewModel.ListProductosPorCategoria.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
-            .fillMaxSize()  // Asegúrate de que la columna ocupe todo el espacio disponible
+            .fillMaxSize()
+            .background(Color(0xFFFD9FC3)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Header(navController = navController)
+        Spacer(modifier = Modifier.height(16.dp))
+        ProductList(listaProductosByCategoria.productos, navController)
+    }
+}
+
+@Composable
+fun ProductList(productos: List<ProductoDTO>, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
             .background(Color(0xFFFFFFFF))
             .padding(8.dp)
     ) {
         SearchBar()
         Spacer(modifier = Modifier.height(10.dp))
-        ProductCard(
-            imageResource = R.drawable.perfume,
-            name = "Nombre del producto:",
-            description = "Descripción:",
-            price = "$250"
-        )
-        ProductCard(
-            imageResource = R.drawable.accesorios,
-            name = "Nombre del producto:",
-            description = "Descripción:",
-            price = "$250",
-            additionalInfo = "Existencia:"
-        )
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(productos) { producto ->
+                ProductCardHome(
+                    imageResource = R.drawable.perfume,
+                    name = producto.nombre,
+                    description = producto.categoria,
+                    price = producto.precio.toString()
+                )
+            }
+        }
     }
 }
 
@@ -148,7 +148,7 @@ fun SearchBar() {
 }
 
 @Composable
-fun ProductCard(
+fun ProductCardHome(
     imageResource: Int,
     name: String,
     description: String,

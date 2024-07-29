@@ -14,11 +14,11 @@ import javax.inject.Inject
 class ProductosRepository @Inject constructor(
     private val api: GlamourAPI
 ) {
-    fun getProductosByCategoria(): Flow<Resource<List<ProductoDTO>>> = flow {
+    fun getProductosByCategoria(categoria: String): Flow<Resource<List<ProductoDTO>>> = flow {
         try {
             emit(Resource.Loading())
 
-            val productos = api.getProductosByCategoria()
+            val productos = api.getProductosByCategoria(categoria)
 
             emit(Resource.Success(productos))
         } catch (@SuppressLint("NewApi") e: HttpException) {

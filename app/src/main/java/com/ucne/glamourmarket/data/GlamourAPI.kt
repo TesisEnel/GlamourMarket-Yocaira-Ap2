@@ -1,5 +1,6 @@
 package com.ucne.glamourmarket.data
 
+
 import com.ucne.glamourmarket.data.dto.CarritoDTO
 import com.ucne.glamourmarket.data.dto.CompraDTO
 import com.ucne.glamourmarket.data.dto.ProductoDTO
@@ -11,6 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface GlamourAPI {
     //Usuarios
@@ -18,7 +20,7 @@ interface GlamourAPI {
     suspend fun registrarUsuarios(@Body usuarioDTO: UsuarioDTO): Response<UsuarioDTO>
 
     @GET("api/Productos/ProductosByCategory")
-    suspend fun getProductosByCategoria():List<ProductoDTO>
+    suspend fun getProductosByCategoria(@Query("categoria") categoria: String):List<ProductoDTO>
 
     @GET("api/Productos/ProductosEnCarritoPorUsuario")
     suspend fun getProductosEnCarritoPorUsuario(usuarioId:Int):List<ProductoDTO>

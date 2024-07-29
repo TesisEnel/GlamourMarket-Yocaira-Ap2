@@ -19,10 +19,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ucne.glamourmarket.ui.theme.screams.CarritoCompra
 import com.ucne.glamourmarket.ui.theme.screams.FormaPago
 import com.ucne.glamourmarket.ui.theme.screams.HomeScream
@@ -62,8 +64,11 @@ fun AppNavigation(navController: NavHostController){
             HomeScream(navController = navController)
         }
 
-        composable(Destination.ProductosPorCategoriaScreen.route){
-            ProductoCategoria(navController = navController)
+        composable(Destination.ProductosPorCategoriaScreen.route + "/{categoria}", arguments = listOf(
+            navArgument("categoria") { type = NavType.StringType})
+        ){ capturar ->
+            val categoria = capturar.arguments?.getString("categoria") ?: ""
+            ProductoCategoria(navController = navController, categoriaSeleccionada = categoria)
         }
 
         composable(Destination.ProductosEnCarritoScreen.route){
