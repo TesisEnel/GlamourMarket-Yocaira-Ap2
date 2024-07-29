@@ -24,11 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.ui.navigation.Destination
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScream() {
+fun HomeScream(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,15 +37,15 @@ fun HomeScream() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Header()
+        Header(navController)
         Spacer(modifier = Modifier.height(16.dp))
-        Content()
+        Content(navController = navController)
     }
 }
 
 
 @Composable
-fun Content() {
+fun Content(navController: NavController) {
     Column(
         modifier = Modifier
             .background(Color(0xFFFFFFFF))
@@ -62,20 +63,22 @@ fun Content() {
             modifier = Modifier.padding(16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        ProductCard(imageResource = R.drawable.perfume, description = "Perfume")
+        ProductCard(imageResource = R.drawable.perfume, description = "Perfume", navController)
         Spacer(modifier = Modifier.height(16.dp))
-        ProductCard(imageResource = R.drawable.maquillaje, description = "Maquillaje")
+        ProductCard(imageResource = R.drawable.maquillaje, description = "Maquillaje", navController)
         Spacer(modifier = Modifier.height(16.dp))
-        ProductCard(imageResource = R.drawable.accesorios, description = "Accesorios")
+        ProductCard(imageResource = R.drawable.accesorios, description = "Accesorios", navController)
     }
 }
 
 @Composable
-fun ProductCard(imageResource: Int, description: String) {
+fun ProductCard(imageResource: Int, description: String, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Acción al hacer clic */ },
+            .clickable {
+                navController.navigate(Destination.ProductosPorCategoriaScreen.route)
+            },
         colors = CardDefaults.cardColors(containerColor = Color(0x54ECCAD6)),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

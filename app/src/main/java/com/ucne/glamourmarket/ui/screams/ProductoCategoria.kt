@@ -41,11 +41,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.ui.navigation.Destination
 
-@Preview(showBackground = true, showSystemUi = true)
+
 @Composable
-fun ProductoCategoria() {
+fun ProductoCategoria(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,14 +55,14 @@ fun ProductoCategoria() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Header()
+        Header(navController = navController)
         Spacer(modifier = Modifier.height(16.dp))
         ProductList()
     }
 }
 
 @Composable
-fun Header() {
+fun Header(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -74,7 +76,7 @@ fun Header() {
             contentDescription = "Salir del usuario",
             modifier = Modifier
                 .size(24.dp)
-                .clickable { /* Acción para el ícono del menú */ }
+                .clickable { navController.navigate(Destination.Login.route) }
         )
 
         Image(
@@ -82,7 +84,7 @@ fun Header() {
             contentDescription = "Logo",
             modifier = Modifier
                 .size(50.dp)
-                .clickable { /* Acción para el logo */ }
+                .clickable { navController.navigate(Destination.Home.route) }
         )
 
         // Aquí puedes agregar un icono para el carrito si lo deseas
@@ -91,7 +93,7 @@ fun Header() {
             contentDescription = "Cart",
             modifier = Modifier
                 .size(24.dp)
-                .clickable {  }
+                .clickable { navController.navigate(Destination.ProductosEnCarritoScreen.route) }
         )
 
     }

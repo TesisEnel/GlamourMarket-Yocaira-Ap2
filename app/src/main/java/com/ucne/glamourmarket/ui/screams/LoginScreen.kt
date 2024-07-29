@@ -35,11 +35,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.ui.navigation.Destination
 
-@Preview(showBackground = true, showSystemUi = true)
+
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,7 +126,7 @@ fun LoginScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    TextButton(onClick = { /* TODO */ }) {
+                    TextButton(onClick = { navController.navigate(Destination.RegistroUsuario.route) }) {
                         Text("Regístrate")
                     }
 
@@ -137,7 +139,7 @@ fun LoginScreen() {
 
                 Button(
                     onClick = {
-
+                        navController.navigate(Destination.Home.route)
                     },
                     Modifier
                         .fillMaxWidth()

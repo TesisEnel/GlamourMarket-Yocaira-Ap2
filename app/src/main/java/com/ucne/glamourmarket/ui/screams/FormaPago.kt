@@ -30,11 +30,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.ucne.glamourmarket.ui.navigation.Destination
 
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun FormaPago(){
+fun FormaPago(navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +43,7 @@ fun FormaPago(){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Header()
+        Header(navController)
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
@@ -139,7 +140,7 @@ fun FormaPago(){
 
                 Button(
                     onClick = {
-
+                        navController.navigate(Destination.Home.route)
                     },
                     Modifier
                         .fillMaxWidth()

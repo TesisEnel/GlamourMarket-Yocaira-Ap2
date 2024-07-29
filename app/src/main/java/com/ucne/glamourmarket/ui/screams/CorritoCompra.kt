@@ -25,11 +25,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.ui.navigation.Destination
 
-@Preview(showBackground = true, showSystemUi = true)
+
 @Composable
-fun CarritoCompra() {
+fun CarritoCompra(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -37,14 +39,14 @@ fun CarritoCompra() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Header()
+        Header(navController)
         Spacer(modifier = Modifier.height(16.dp))
-        ListaProductoCarrito()
+        ListaProductoCarrito(navController)
     }
 }
 
 @Composable
-fun ListaProductoCarrito() {
+fun ListaProductoCarrito(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()  // Asegúrate de que la columna ocupe todo el espacio disponible
@@ -88,7 +90,7 @@ fun ListaProductoCarrito() {
 
         Button(
             onClick = {
-
+                navController.navigate(Destination.PagarScreen.route)
             },
             Modifier
                 .fillMaxWidth()
