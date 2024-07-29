@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
-import com.ucne.glamourmarket.ui.navigation.Destination
+import com.ucne.glamourmarket.ui.presentation.navigation.Destination
 
 
 @Composable

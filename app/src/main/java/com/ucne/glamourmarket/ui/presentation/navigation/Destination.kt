@@ -1,4 +1,4 @@
-package com.ucne.glamourmarket.ui.navigation
+package com.ucne.glamourmarket.ui.presentation.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

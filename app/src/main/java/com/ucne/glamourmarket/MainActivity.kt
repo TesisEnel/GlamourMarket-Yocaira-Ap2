@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.ucne.glamourmarket.ui.navigation.AppScreen
+import com.ucne.glamourmarket.ui.presentation.navigation.AppScreen
 import com.ucne.glamourmarket.ui.theme.GlamourMarketTheme
 import dagger.hilt.android.AndroidEntryPoint
 
