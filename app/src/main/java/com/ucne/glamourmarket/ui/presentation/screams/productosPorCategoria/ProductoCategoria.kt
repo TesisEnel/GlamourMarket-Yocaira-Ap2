@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.ui.presentation.navigation.Destination
@@ -115,7 +116,7 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController) {
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(productos) { producto ->
                 ProductCardHome(
-                    imageResource = R.drawable.perfume,
+                    imageUrl = producto.imagen,
                     name = producto.nombre,
                     description = producto.categoria,
                     price = producto.precio.toString()
@@ -149,7 +150,7 @@ fun SearchBar() {
 
 @Composable
 fun ProductCardHome(
-    imageResource: Int,
+    imageUrl: String,
     name: String,
     description: String,
     price: String,
@@ -167,7 +168,7 @@ fun ProductCardHome(
             modifier = Modifier.padding(16.dp)
         ) {
             Image(
-                painter = painterResource(id = imageResource),
+                painter = rememberAsyncImagePainter(imageUrl),
                 contentDescription = "Producto",
                 modifier = Modifier
                     .size(150.dp)
