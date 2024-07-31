@@ -58,7 +58,7 @@ fun Content(navController: NavController) {
             modifier = Modifier.padding(16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        ProductCardHome(imageResource = R.drawable.perfume, categoria = "Perfume", navController)
+        ProductCardHome(imageResource = R.drawable.perfume, categoria = "Perfumes", navController)
         Spacer(modifier = Modifier.height(16.dp))
         ProductCardHome(imageResource = R.drawable.maquillaje, categoria = "Maquillaje", navController)
         Spacer(modifier = Modifier.height(16.dp))
@@ -83,7 +83,7 @@ fun ProductCardHome(imageResource: Int, categoria: String, navController: NavCon
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Color.LightGray) // Aquí irá tu imagen de producto
+                    .background(Color.LightGray)
             ) {
                 Image(
                     painter = painterResource(id = imageResource),

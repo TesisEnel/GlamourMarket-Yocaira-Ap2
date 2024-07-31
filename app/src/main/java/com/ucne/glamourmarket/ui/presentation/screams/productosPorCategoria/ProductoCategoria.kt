@@ -115,7 +115,7 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController) {
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(productos) { producto ->
-                ProductCardHome(
+                ProductCard(
                     imageUrl = producto.imagen,
                     name = producto.nombre,
                     description = producto.categoria,
@@ -149,7 +149,7 @@ fun SearchBar() {
 }
 
 @Composable
-fun ProductCardHome(
+fun ProductCard(
     imageUrl: String,
     name: String,
     description: String,
