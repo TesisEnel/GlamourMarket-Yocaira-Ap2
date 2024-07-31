@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.net.http.HttpException
 import com.ucne.glamourmarket.data.GlamourAPI
 import com.ucne.glamourmarket.data.dto.CompraDTO
-import com.ucne.glamourmarket.data.dto.ProductoDTO
-import com.ucne.glamourmarket.ui.theme.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException

@@ -1,4 +1,4 @@
-package com.ucne.glamourmarket.ui.presentation.navigation
+package com.ucne.glamourmarket.presentation.navigation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +69,8 @@ fun AppNavigation(navController: NavHostController){
             HomeScream(navController = navController)
         }
 
-        composable(Destination.ProductosPorCategoriaScreen.route + "/{categoria}", arguments = listOf(
+        composable(
+            Destination.ProductosPorCategoriaScreen.route + "/{categoria}", arguments = listOf(
             navArgument("categoria") { type = NavType.StringType})
         ){ capturar ->
             val categoria = capturar.arguments?.getString("categoria") ?: ""

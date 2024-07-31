@@ -47,9 +47,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.data.dto.ProductoDTO
-import com.ucne.glamourmarket.ui.presentation.navigation.Destination
-import com.ucne.glamourmarket.ui.presentation.screams.login.LoginViewModel
-import com.ucne.glamourmarket.ui.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
+import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
+import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable

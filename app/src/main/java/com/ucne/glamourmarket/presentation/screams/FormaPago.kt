@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.ucne.glamourmarket.ui.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.navigation.Destination
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.ucne.glamourmarket.ui.presentation.screams.productosPorCategoria
+package com.ucne.glamourmarket.presentation.screams.productosPorCategoria
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.data.repository.ProductosRepository
-import com.ucne.glamourmarket.ui.theme.Resource
+import com.ucne.glamourmarket.data.repository.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

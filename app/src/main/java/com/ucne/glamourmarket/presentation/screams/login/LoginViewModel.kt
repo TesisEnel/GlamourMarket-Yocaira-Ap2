@@ -1,4 +1,4 @@
-package com.ucne.glamourmarket.ui.presentation.screams.login
+package com.ucne.glamourmarket.presentation.screams.login
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.ucne.glamourmarket.data.dto.UsuarioDTO
 import com.ucne.glamourmarket.data.repository.UsuariosRepository
-import com.ucne.glamourmarket.ui.theme.Resource
+import com.ucne.glamourmarket.data.repository.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

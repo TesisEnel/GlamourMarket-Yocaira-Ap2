@@ -3,7 +3,6 @@ package com.ucne.glamourmarket.data.repository
 import retrofit2.HttpException
 import com.ucne.glamourmarket.data.GlamourAPI
 import com.ucne.glamourmarket.data.dto.UsuarioDTO
-import com.ucne.glamourmarket.ui.theme.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException

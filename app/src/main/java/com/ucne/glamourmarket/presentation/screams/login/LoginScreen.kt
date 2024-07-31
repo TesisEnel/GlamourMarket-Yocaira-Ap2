@@ -47,8 +47,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
-import com.ucne.glamourmarket.ui.presentation.navigation.Destination
-import com.ucne.glamourmarket.ui.presentation.screams.login.LoginViewModel
+import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 import kotlinx.coroutines.delay
 
 
