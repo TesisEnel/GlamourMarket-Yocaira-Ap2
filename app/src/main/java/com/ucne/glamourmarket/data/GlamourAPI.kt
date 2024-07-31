@@ -15,7 +15,10 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GlamourAPI {
-    //Usuarios
+
+    @GET("api/Usuarios")
+    suspend fun getUsuarios():List<UsuarioDTO>
+
     @POST("api/Usuarios")
     suspend fun registrarUsuarios(@Body usuarioDTO: UsuarioDTO): Response<UsuarioDTO>
 

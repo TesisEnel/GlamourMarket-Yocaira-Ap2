@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.ucne.glamourmarket.ui.theme.screams.CarritoCompra
 import com.ucne.glamourmarket.ui.theme.screams.FormaPago
 import com.ucne.glamourmarket.ui.theme.screams.HomeScream
@@ -50,7 +51,11 @@ fun AppScreen() {
 fun AppNavigation(navController: NavHostController){
     NavHost(
         navController,
-        startDestination = Destination.Login.route
+        startDestination = if(FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()){
+            Destination.Login.route
+        } else{
+            Destination.Home.route
+        }
     ){
         composable(Destination.Login.route){
             LoginScreen(navController = navController)

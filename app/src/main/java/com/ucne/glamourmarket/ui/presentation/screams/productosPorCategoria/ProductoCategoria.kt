@@ -48,10 +48,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.ui.presentation.navigation.Destination
+import com.ucne.glamourmarket.ui.presentation.screams.login.LoginViewModel
 import com.ucne.glamourmarket.ui.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
-fun Header(navController: NavController) {
+fun Header(navController: NavController, viewModel: LoginViewModel = hiltViewModel()) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,7 +66,10 @@ fun Header(navController: NavController) {
             contentDescription = "Salir del usuario",
             modifier = Modifier
                 .size(24.dp)
-                .clickable { navController.navigate(Destination.Login.route) }
+                .clickable { viewModel.singOut {
+                    navController.navigate(Destination.Login.route)
+                    }
+                }
         )
 
         Image(

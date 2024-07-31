@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "367028227771",
+    "project_id": "glamourmarket-d87a1",
+    "storage_bucket": "glamourmarket-d87a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:367028227771:android:65f3ca2ac338d01f8da39e",
+        "android_client_info": {
+          "package_name": "com.ucne.glamourmarket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzCtaV4Nw070Mtxvk8lXNk03ZG0qvk03Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
