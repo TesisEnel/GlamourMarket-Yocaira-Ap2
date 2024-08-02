@@ -29,14 +29,16 @@ class RegisterViewModel @Inject constructor(
     var nicknameError by mutableStateOf(true)
     var emailError by mutableStateOf(true)
     var passwordError by mutableStateOf(true)
+    var passwordLengthError by mutableStateOf(true)
     var registerError by mutableStateOf(false)
 
     fun ValidarRegistro(): Boolean {
         nicknameError = nickname.isNotEmpty()
         emailError = email.isNotEmpty()
         passwordError = password.isNotEmpty()
+        passwordLengthError = password.length >= 6
 
-        return nicknameError && emailError && passwordError
+        return nicknameError && emailError && passwordError && passwordLengthError
     }
 
 

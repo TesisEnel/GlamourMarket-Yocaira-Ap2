@@ -161,6 +161,9 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     if (!viewModel.passwordError) {
                         Text(text = "El campo contraseña está vacío", color = Color.Red)
                     }
+                    if (!viewModel.passwordLengthError) {
+                        Text(text = "El campo contraseña debe tener 6 o mas digitos", color = Color.Red)
+                    }
 
                     Spacer(modifier = Modifier.height(40.dp))
 
