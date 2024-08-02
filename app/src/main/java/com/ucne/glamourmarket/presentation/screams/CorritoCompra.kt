@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
 
 

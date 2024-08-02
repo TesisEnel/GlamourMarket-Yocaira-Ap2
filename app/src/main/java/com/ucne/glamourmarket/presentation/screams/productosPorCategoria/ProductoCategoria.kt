@@ -47,49 +47,12 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.data.dto.ProductoDTO
+import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
 import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
-@Composable
-fun Header(navController: NavController, viewModel: LoginViewModel = hiltViewModel()) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.ExitToApp,
-            contentDescription = "Salir del usuario",
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { viewModel.singOut {
-                    navController.navigate(Destination.Login.route)
-                    }
-                }
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.logo_solo),
-            contentDescription = "Logo",
-            modifier = Modifier
-                .size(50.dp)
-                .clickable { navController.navigate(Destination.Home.route) }
-        )
-
-        Icon(
-            imageVector = Icons.Default.ShoppingCart,
-            contentDescription = "Cart",
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { navController.navigate(Destination.ProductosEnCarritoScreen.route) }
-        )
-
-    }
-}
 
 @Composable
 fun ProductoCategoria(navController: NavController, viewModel: ProductoCategoriaViewModel = hiltViewModel(), categoriaSeleccionada: String) {

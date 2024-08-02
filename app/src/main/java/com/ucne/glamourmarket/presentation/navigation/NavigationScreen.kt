@@ -62,7 +62,7 @@ fun AppNavigation(navController: NavHostController){
         }
 
         composable(Destination.RegistroUsuario.route){
-            RegisterScreen()
+            RegisterScreen(navController)
         }
 
         composable(Destination.Home.route){
