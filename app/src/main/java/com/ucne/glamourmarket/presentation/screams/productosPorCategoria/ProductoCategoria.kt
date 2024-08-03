@@ -50,6 +50,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.presentation.components.Header
+import com.ucne.glamourmarket.presentation.components.SearchBar
+import com.ucne.glamourmarket.presentation.components.SnackbarErrorProductoYaEnCarrito
+import com.ucne.glamourmarket.presentation.components.SnackbarProductoAgregadoConExito
 import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.CarritoViewModel
 import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
@@ -82,28 +85,8 @@ fun ProductoCategoria(
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductList(productos: List<ProductoDTO>, navController: NavController, carritoViewModel: CarritoViewModel = hiltViewModel()) {
-    if (carritoViewModel.errorProductoYaEnCarrito) {
-        Snackbar(
-            action = {
-                TextButton(
-                    onClick = { carritoViewModel.errorProductoYaEnCarrito = false },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-                ) {
-                    Text(text = "OK")
-                }
-            },
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = "El producto ya esta en el carrito",
-                color = Color.Red
-            )
-        }
-        LaunchedEffect(Unit) {
-            delay(3000)
-            carritoViewModel.errorProductoYaEnCarrito = false
-        }
-    }
+    SnackbarErrorProductoYaEnCarrito(carritoViewModel)
+    SnackbarProductoAgregadoConExito(carritoViewModel)
 
     Column(
         modifier = Modifier
@@ -127,28 +110,6 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController, carr
             }
         }
     }
-}
-
-@Composable
-fun SearchBar() {
-    OutlinedTextField(
-        value = "",
-        onValueChange = {},
-        label = { Text("Buscar") },
-        trailingIcon = {
-            IconButton(onClick = { /* Acción al hacer clic */ }) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Buscar",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    )
 }
 
 @SuppressLint("SuspiciousIndentation")
@@ -236,9 +197,6 @@ fun ProductCard(
                         onClick = {
                             // Asegurarse de que el usuario actual no sea nulo
                             if (usuarioActual?.id != null) {
-                                carritoViewModel.validarSiYaExisteEnCarrito(usuarioActual.id, productoId)
-
-                                if(!carritoViewModel.errorProductoYaEnCarrito)
                                 carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, 1)
                             }
                         },

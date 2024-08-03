@@ -13,7 +13,9 @@ import com.ucne.glamourmarket.data.dto.ProductosEnCarritoDTO
 import com.ucne.glamourmarket.data.repository.CarritosRepository
 import com.ucne.glamourmarket.data.repository.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Flow
 import javax.inject.Inject
 
@@ -26,30 +28,35 @@ class CarritoViewModel @Inject constructor(
     private val carritosRepository: CarritosRepository
 ) : ViewModel() {
     var errorProductoYaEnCarrito by mutableStateOf(false)
+    var productoAgregadoConExito by mutableStateOf(false)
 
-
-    fun validarSiYaExisteEnCarrito(usuarioId: Int, productoId: Int) {
-        viewModelScope.launch {
+    suspend fun validarSiYaExisteEnCarrito(usuarioId: Int, productoId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
             val carrito = carritosRepository.getCarritoId(usuarioId)
+            var productoExiste = false
             carrito.collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         val productos = resource.data?.productosEnCarrito ?: emptyList()
-                        // Verificar si el producto ya está en la lista
-                        errorProductoYaEnCarrito = productos.any { it.productoId == productoId }
+                        productoExiste = productos.any { it.productoId == productoId }
                     }
-
                     else -> {
-                        errorProductoYaEnCarrito = false
+                        productoExiste = false
                     }
                 }
             }
+            productoExiste
         }
     }
 
     fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int) {
         viewModelScope.launch {
-            carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
+            val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
+            errorProductoYaEnCarrito = existe
+            if (!existe) {
+                carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
+                productoAgregadoConExito = true
+            }
         }
     }
 }
