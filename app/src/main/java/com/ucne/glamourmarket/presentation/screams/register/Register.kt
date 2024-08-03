@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,16 +44,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 import com.ucne.glamourmarket.presentation.screams.register.RegisterViewModel
 import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = hiltViewModel()) {
+fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = hiltViewModel(), loginViewModel: LoginViewModel = hiltViewModel()) {
+    val usuarioState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -171,9 +175,16 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                         onClick = {
                             keyboardController?.hide()
                             if(viewModel.ValidarRegistro()){
-                                viewModel.send()
-                                viewModel.createUserWithEmailAndPassword(viewModel.email, viewModel.password){
-                                    navController.navigate(Destination.Login.route)
+                                val usuarioExiste = usuarioState.usuarios.any {
+                                    it.email == viewModel.email || it.nickName == viewModel.nickname
+                                }
+                                if(!usuarioExiste){
+                                    viewModel.send()
+                                    viewModel.createUserWithEmailAndPassword(viewModel.email, viewModel.password){
+                                        navController.navigate(Destination.Login.route)
+                                    }
+                                } else {
+                                    viewModel.registerError = true
                                 }
                             }
                         },
@@ -209,8 +220,8 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                 modifier = Modifier.padding(8.dp)
             ) {
                 Text(
-                    text = "Las credenciales no son correctas.",
-                    color = Color.Red
+                    text = "Las credenciales no son correctas o el email ya esta registrado",
+                    color = Color.White
                 )
             }
             LaunchedEffect(Unit) {

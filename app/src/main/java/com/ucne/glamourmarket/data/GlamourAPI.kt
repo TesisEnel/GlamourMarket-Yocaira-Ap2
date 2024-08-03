@@ -26,20 +26,24 @@ interface GlamourAPI {
     suspend fun getProductosByCategoria(@Query("categoria") categoria: String):List<ProductoDTO>
 
     @GET("api/Productos/ProductosEnCarritoPorUsuario")
-    suspend fun getProductosEnCarritoPorUsuario(usuarioId:Int):List<ProductoDTO>
+    suspend fun getProductosEnCarritoPorUsuario(@Query("usuarioId") usuarioId:Int):List<ProductoDTO>
 
     @PUT("api/Carritos/AgregarProductoACarrito")
-    suspend fun agregarProductoACarrito(usuarioId:Int, productoId: Int, cantidad: Int): Response<Unit>
+    suspend fun agregarProductoACarrito(
+        @Query("usuarioId") usuarioId: Int,
+        @Query("productoId") productoId: Int,
+        @Query("cantidad") cantidad: Int
+    ): Response<Unit>
 
     @DELETE("api/Carritos/EliminarProductoDelCarrito")
-    suspend fun eliminarProductoDelCarrito(usuarioId: Int, productoId: Int): Response<CarritoDTO>
+    suspend fun eliminarProductoDelCarrito(@Query("usuarioId") usuarioId: Int, @Query("productoId") productoId: Int): Response<CarritoDTO>
+
+    @GET("api/Carritos/{id}")
+    suspend fun getCarritoByIdUsuario(@Path("id") id: Int): CarritoDTO
 
     @POST("api/Compras/{carritoId}/ComprarTodoEnCarrito")
     suspend fun comprarTodoEnCarrito(carritoId: Int): Response<CompraDTO>
 
     @GET("api/Compras/{id}")
     suspend fun getComprasById(@Path("id") id: Int): CompraDTO
-
-
-
 }

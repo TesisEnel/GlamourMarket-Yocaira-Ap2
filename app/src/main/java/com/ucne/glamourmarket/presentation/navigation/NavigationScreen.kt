@@ -48,42 +48,36 @@ fun AppScreen() {
 }
 
 @Composable
-fun AppNavigation(navController: NavHostController){
+fun AppNavigation(navController: NavHostController) {
     NavHost(
-        navController,
-        startDestination = if(FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()){
+        navController = navController,
+        startDestination = if (FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()) {
             Destination.Login.route
-        } else{
+        } else {
             Destination.Home.route
         }
-    ){
-        composable(Destination.Login.route){
+    ) {
+        composable(Destination.Login.route) {
             LoginScreen(navController = navController)
         }
-
-        composable(Destination.RegistroUsuario.route){
+        composable(Destination.RegistroUsuario.route) {
             RegisterScreen(navController)
         }
-
-        composable(Destination.Home.route){
+        composable(Destination.Home.route) {
             HomeScream(navController = navController)
         }
-
         composable(
-            Destination.ProductosPorCategoriaScreen.route + "/{categoria}", arguments = listOf(
-            navArgument("categoria") { type = NavType.StringType})
-        ){ capturar ->
+            Destination.ProductosPorCategoriaScreen.route + "/{categoria}",
+            arguments = listOf(navArgument("categoria") { type = NavType.StringType })
+        ) { capturar ->
             val categoria = capturar.arguments?.getString("categoria") ?: ""
             ProductoCategoria(navController = navController, categoriaSeleccionada = categoria)
         }
-
-        composable(Destination.ProductosEnCarritoScreen.route){
+        composable(Destination.ProductosEnCarritoScreen.route) {
             CarritoCompra(navController = navController)
         }
-
-        composable(Destination.PagarScreen.route){
+        composable(Destination.PagarScreen.route) {
             FormaPago(navController = navController)
         }
     }
-
 }

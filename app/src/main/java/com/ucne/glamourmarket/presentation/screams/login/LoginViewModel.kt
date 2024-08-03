@@ -47,9 +47,13 @@ class LoginViewModel @Inject constructor(
 
     val auth: FirebaseAuth = Firebase.auth
 
+    private fun isEmailValid(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
     fun ValidarLogin(): Boolean {
 
-        emailError = email.isNotEmpty()
+        emailError = email.isNotEmpty() && isEmailValid(email)
         passwordError = password.isNotEmpty()
 
         return emailError && passwordError
