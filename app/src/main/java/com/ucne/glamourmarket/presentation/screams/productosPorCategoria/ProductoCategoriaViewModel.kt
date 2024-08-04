@@ -62,25 +62,4 @@ class ProductoCategoriaViewModel @Inject constructor(
 
         }.launchIn(viewModelScope)
     }
-
-    fun cargarProductosEnCarritoPorUsuario(usuarioId: Int){
-        productosRepository.getProductosEnCarritoPorUsuario(usuarioId).onEach { result ->
-            when(result){
-                is Resource.Loading -> {
-                    _ListProductos.update { it.copy(isLoading = true) }
-                }
-
-                is Resource.Success -> {
-                    _ListProductos.update { it.copy(productos = result.data ?: emptyList()) }
-
-                }
-
-                is Resource.Error -> {
-                    _ListProductos.update { it.copy(error = result.message ?: "Error desconocido") }
-                }
-                else -> {}
-            }
-
-        }.launchIn(viewModelScope)
-    }
 }

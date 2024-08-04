@@ -8,24 +8,42 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.data.repository.CarritosRepository
+import com.ucne.glamourmarket.data.repository.ProductosRepository
 import com.ucne.glamourmarket.data.repository.Resource
+import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-
+data class ProductoListState(
+    val isLoading: Boolean = false,
+    val productos: List<ProductoDTO> = emptyList(),
+    val producto: ProductoDTO? = null,
+    val error: String = ""
+)
 @SuppressLint("MutableCollectionMutableState")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @HiltViewModel
 class CarritoViewModel @Inject constructor(
-    private val carritosRepository: CarritosRepository
+    private val carritosRepository: CarritosRepository,
+    private val productosRepository: ProductosRepository
 ) : ViewModel() {
     var errorProductoYaEnCarrito by mutableStateOf(false)
     var productoAgregadoConExito by mutableStateOf(false)
+
+    private val _ListProductos = MutableStateFlow(ProductoListState())
+    val ListProductos: StateFlow<ProductoListState> = _ListProductos.asStateFlow()
 
     suspend fun validarSiYaExisteEnCarrito(usuarioId: Int, productoId: Int): Boolean {
         return withContext(Dispatchers.IO) {
@@ -46,6 +64,27 @@ class CarritoViewModel @Inject constructor(
         }
     }
 
+    fun cargarProductosEnCarritoPorUsuario(usuarioId: Int){
+        productosRepository.getProductosEnCarritoPorUsuario(usuarioId).onEach { result ->
+            when(result){
+                is Resource.Loading -> {
+                    _ListProductos.update { it.copy(isLoading = true) }
+                }
+
+                is Resource.Success -> {
+                    _ListProductos.update { it.copy(productos = result.data ?: emptyList()) }
+
+                }
+
+                is Resource.Error -> {
+                    _ListProductos.update { it.copy(error = result.message ?: "Error desconocido") }
+                }
+                else -> {}
+            }
+
+        }.launchIn(viewModelScope)
+    }
+
     fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int) {
         viewModelScope.launch {
             val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
@@ -54,6 +93,13 @@ class CarritoViewModel @Inject constructor(
                 carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
                 productoAgregadoConExito = true
             }
+        }
+    }
+
+    fun eliminarProductoACarrito(usuarioId: Int, productoId: Int) {
+        viewModelScope.launch {
+            carritosRepository.eliminarProductoDelCarrito(usuarioId, productoId)
+            cargarProductosEnCarritoPorUsuario(usuarioId)
         }
     }
 }
