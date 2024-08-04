@@ -1,5 +1,7 @@
 package com.ucne.glamourmarket.presentation.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +36,7 @@ import com.ucne.glamourmarket.ui.theme.screams.ProductoCategoria
 import com.ucne.glamourmarket.ui.theme.screams.RegisterScreen
 
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun AppScreen() {
     val navController = rememberNavController()
@@ -47,6 +50,7 @@ fun AppScreen() {
     )
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(

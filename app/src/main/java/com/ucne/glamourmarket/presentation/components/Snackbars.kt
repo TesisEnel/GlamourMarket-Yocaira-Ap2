@@ -11,9 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.CarritoViewModel
+import com.ucne.glamourmarket.presentation.screams.Carrito.CarritoViewModel
 import kotlinx.coroutines.delay
-import java.lang.reflect.Modifier
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable

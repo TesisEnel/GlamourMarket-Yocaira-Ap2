@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -13,6 +15,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,38 +25,57 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
+import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
 
 
 @Composable
-fun CarritoCompra(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFD9FC3)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Header(navController)
-        Spacer(modifier = Modifier.height(16.dp))
-        ListaProductoCarrito(navController)
+fun CarritoCompra(navController: NavController, productosViewModel: ProductoCategoriaViewModel = hiltViewModel(), usuarioViewModel: LoginViewModel = hiltViewModel()) {
+    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    val currentUser = usuarioViewModel.auth.currentUser
+
+    if(currentUser != null){
+        val usuarioActual = usuarioState.usuarios.singleOrNull {
+            it.email == currentUser.email
+        }
+
+        if (usuarioActual != null) {
+            usuarioActual.id?.let { productosViewModel.cargarProductosEnCarritoPorUsuario(it) }
+        }
+
+        val productosState by productosViewModel.ListProductos.collectAsStateWithLifecycle()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFFD9FC3)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Header(navController)
+            Spacer(modifier = Modifier.height(16.dp))
+            ListaProductoCarrito(navController, productosState.productos)
+        }
     }
 }
 
 @Composable
-fun ListaProductoCarrito(navController: NavController) {
+fun ListaProductoCarrito(navController: NavController, productos: List<ProductoDTO>) {
     Column(
         modifier = Modifier
-            .fillMaxSize()  // Asegúrate de que la columna ocupe todo el espacio disponible
+            .fillMaxSize()
             .background(Color(0xFFFFFFFF))
             .padding(8.dp)
-
     ) {
         Text(
             text = "Carrito de compra",
@@ -66,57 +88,65 @@ fun ListaProductoCarrito(navController: NavController) {
             modifier = Modifier.padding(16.dp)
         )
 
-
-        ProductoCarrito(
-            imageResource = R.drawable.perfume,
-            name = "Nombre del producto:",
-            description = "Descripción:",
-            price = "$250",
-        )
-        ProductoCarrito(
-            imageResource = R.drawable.accesorios,
-            name = "Nombre del producto:",
-            description = "Descripción:",
-            price = "$250",
-        )
-        Text(
-            text = "Total: $500",
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontFamily = FontFamily.SansSerif
-            ),
-            modifier = Modifier.padding(16.dp)
-        )
-
-        Button(
-            onClick = {
-                navController.navigate(Destination.PagarScreen.route)
-            },
-            Modifier
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(size = 10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFD9FC3),
-                contentColor = Color.White
-            )
+                .weight(1f) // Assign weight to take the remaining space
         ) {
-            Text(
-                text = "Comprar",
-                color = Color.Black,
-                fontSize = 18.sp
-            )
+            items(productos) { producto ->
+                ProductoCarrito(
+                    imageResource = producto.imagen,
+                    name = producto.nombre,
+                    categoria = producto.categoria,
+                    price = producto.precio.toString()
+                )
+            }
         }
 
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Total: $500",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    color = Color.Black,
+                    fontFamily = FontFamily.SansSerif
+                ),
+                modifier = Modifier.padding(16.dp)
+            )
+
+            Button(
+                onClick = {
+                    navController.navigate(Destination.PagarScreen.route)
+                },
+                Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(size = 10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFD9FC3),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Comprar",
+                    color = Color.Black,
+                    fontSize = 18.sp
+                )
+            }
+        }
     }
 }
 
+
 @Composable
 fun ProductoCarrito(
-    imageResource: Int,
+    imageResource: String,
     name: String,
-    description: String,
+    categoria: String,
     price: String,
     additionalInfo: String? = null
 ) {
@@ -125,14 +155,14 @@ fun ProductoCarrito(
             .fillMaxWidth()
             .padding(16.dp)
             .clickable { /* Acción al hacer clic */ },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFCFB)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp)
         ) {
             Image(
-                painter = painterResource(id = imageResource),
+                painter = rememberAsyncImagePainter(model = imageResource),
                 contentDescription = "Producto",
                 modifier = Modifier
                     .size(150.dp)
@@ -152,7 +182,7 @@ fun ProductoCarrito(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = description,
+                    text = categoria,
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
@@ -203,5 +233,4 @@ fun ProductoCarrito(
             }
         }
     }
-
 }

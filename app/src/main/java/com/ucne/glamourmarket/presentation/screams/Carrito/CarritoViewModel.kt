@@ -1,22 +1,19 @@
-package com.ucne.glamourmarket.presentation.screams.productosPorCategoria
+package com.ucne.glamourmarket.presentation.screams.Carrito
 
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ucne.glamourmarket.data.dto.ProductosEnCarritoDTO
 import com.ucne.glamourmarket.data.repository.CarritosRepository
 import com.ucne.glamourmarket.data.repository.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Flow
 import javax.inject.Inject
 
 
