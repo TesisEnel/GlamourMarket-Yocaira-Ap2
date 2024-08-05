@@ -4,6 +4,7 @@ package com.ucne.glamourmarket.data
 import com.ucne.glamourmarket.data.dto.CarritoDTO
 import com.ucne.glamourmarket.data.dto.CompraDTO
 import com.ucne.glamourmarket.data.dto.ProductoDTO
+import com.ucne.glamourmarket.data.dto.ProductosEnCarritoDTO
 import com.ucne.glamourmarket.data.dto.UsuarioDTO
 import retrofit2.Response
 import retrofit2.http.Body
@@ -28,6 +29,9 @@ interface GlamourAPI {
     @GET("api/Productos/ProductosEnCarritoPorUsuario")
     suspend fun getProductosEnCarritoPorUsuario(@Query("usuarioId") usuarioId:Int):List<ProductoDTO>
 
+    @GET("api/Productos/{id}")
+    suspend fun getProductoById(@Path("id") id: Int): ProductoDTO
+
     @PUT("api/Carritos/AgregarProductoACarrito")
     suspend fun agregarProductoACarrito(
         @Query("usuarioId") usuarioId: Int,
@@ -40,6 +44,9 @@ interface GlamourAPI {
 
     @GET("api/Carritos/{id}")
     suspend fun getCarritoByIdUsuario(@Path("id") id: Int): CarritoDTO
+
+    @GET("api/Carritos/detalleCarritoProductos/{usuarioId}")
+    suspend fun getDetalleCarritoProductos(@Path("usuarioId") usuarioId: Int): List<ProductosEnCarritoDTO>
 
     @POST("api/Compras/{carritoId}/ComprarTodoEnCarrito")
     suspend fun comprarTodoEnCarrito(carritoId: Int): Response<CompraDTO>

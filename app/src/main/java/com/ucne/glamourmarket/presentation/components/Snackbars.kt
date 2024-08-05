@@ -11,12 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ucne.glamourmarket.presentation.screams.Carrito.CarritoViewModel
 import kotlinx.coroutines.delay
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun SnackbarErrorProductoYaEnCarrito(carritoViewModel: CarritoViewModel) {
+fun SnackbarErrorProductoYaEnCarrito(carritoViewModel: CarritoViewModel = hiltViewModel()) {
     if (carritoViewModel.errorProductoYaEnCarrito) {
         Snackbar(
             action = {
@@ -43,7 +44,7 @@ fun SnackbarErrorProductoYaEnCarrito(carritoViewModel: CarritoViewModel) {
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun SnackbarProductoAgregadoConExito(carritoViewModel: CarritoViewModel) {
+fun SnackbarProductoAgregadoConExito(carritoViewModel: CarritoViewModel = hiltViewModel()) {
     if (carritoViewModel.productoAgregadoConExito) {
         Snackbar(
             action = {

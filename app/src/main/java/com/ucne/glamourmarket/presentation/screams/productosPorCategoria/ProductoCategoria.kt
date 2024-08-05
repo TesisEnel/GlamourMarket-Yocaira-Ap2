@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -75,8 +79,8 @@ fun ProductoCategoria(
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductList(productos: List<ProductoDTO>, navController: NavController, carritoViewModel: CarritoViewModel = hiltViewModel()) {
-    SnackbarErrorProductoYaEnCarrito(carritoViewModel)
-    SnackbarProductoAgregadoConExito(carritoViewModel)
+    SnackbarErrorProductoYaEnCarrito()
+    SnackbarProductoAgregadoConExito()
 
     Column(
         modifier = Modifier
@@ -93,7 +97,7 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController, carr
                         productoId = it,
                         imageUrl = producto.imagen,
                         name = producto.nombre,
-                        description = producto.categoria,
+                        stock = producto.existencia.toString(),
                         price = producto.precio.toString()
                     )
                 }
@@ -109,7 +113,7 @@ fun ProductCard(
     productoId: Int,
     imageUrl: String,
     name: String,
-    description: String,
+    stock: String,
     price: String,
     additionalInfo: String? = null,
     carritoViewModel: CarritoViewModel = hiltViewModel(),
@@ -128,100 +132,119 @@ fun ProductCard(
             it.email == currentUser.email
         }
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clickable { /* Acción al hacer clic */ },
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp)
+        if(usuarioActual != null) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clickable { /* Acción al hacer clic */ },
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(imageUrl),
-                    contentDescription = "Producto",
-                    modifier = Modifier
-                        .size(150.dp)
-                        .background(Color.LightGray),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                Row(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(
-                        text = name,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUrl),
+                        contentDescription = "Producto",
+                        modifier = Modifier
+                            .size(150.dp)
+                            .background(Color.LightGray),
+                        contentScale = ContentScale.Crop
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = description,
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    )
-                    additionalInfo?.let {
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
                         Text(
-                            text = it,
+                            text = name,
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Existencia: $stock",
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         )
-                    }
-                    Text(
-                        text = "Precio: $price",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = {
-                            // Asegurarse de que el usuario actual no sea nulo
-                            if (usuarioActual?.id != null) {
-                                carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, 1)
-                            }
-                        },
-                        Modifier
-                            .fillMaxWidth()
-                            .height(35.dp),
-                        shape = RoundedCornerShape(size = 10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFD9FC3),
-                            contentColor = Color.White
-                        )
-                    ) {
+                        additionalInfo?.let {
+                            Text(
+                                text = it,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            )
+                        }
                         Text(
-                            text = "Agregar al carrito",
-                            color = Color.Black,
-                            fontSize = 12.sp
+                            text = "Precio: $price",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
                         )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { /* Acción al hacer clic */ },
-                        Modifier
-                            .fillMaxWidth()
-                            .height(35.dp),
-                        shape = RoundedCornerShape(size = 10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFD08A),
-                            contentColor = Color.White
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = carritoViewModel.cantidadSeleccionada.toString(),
+                            onValueChange = {
+                                val newValue = it.toIntOrNull()
+                                if (newValue != null) {
+                                    carritoViewModel.cantidadSeleccionada = newValue
+                                }
+                            },
+                            label = { Text("Cantidad") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number,imeAction = ImeAction.Next),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
                         )
-                    ) {
-                        Text(
-                            text = "Comprar ahora",
-                            color = Color.Black,
-                            fontSize = 12.sp
-                        )
+
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Button(
+                            onClick = {
+                                // Asegurarse de que el usuario actual no sea nulo
+                                if (usuarioActual?.id != null) {
+                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId)
+                                }
+                            },
+                            Modifier
+                                .fillMaxWidth()
+                                .height(35.dp),
+                            shape = RoundedCornerShape(size = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFD9FC3),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = "Agregar al carrito",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { /* Acción al hacer clic */ },
+                            Modifier
+                                .fillMaxWidth()
+                                .height(35.dp),
+                            shape = RoundedCornerShape(size = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD08A),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = "Comprar ahora",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
@@ -230,4 +253,3 @@ fun ProductCard(
         println("No hay usuario autenticado.")
     }
 }
-
