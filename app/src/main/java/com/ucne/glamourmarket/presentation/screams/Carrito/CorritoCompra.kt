@@ -150,7 +150,7 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
 
                         Button(
                             onClick = {
-                                navController.navigate(Destination.PagarScreen.route)
+                                navController.navigate(Destination.PagarScreen.route + "/${total}")
                             },
                             Modifier
                                 .fillMaxWidth()

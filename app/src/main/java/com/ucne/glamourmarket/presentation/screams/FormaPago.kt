@@ -36,7 +36,7 @@ import com.ucne.glamourmarket.presentation.navigation.Destination
 
 
 @Composable
-fun FormaPago(navController: NavController){
+fun FormaPago(navController: NavController, totalCompra: String){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -131,7 +131,7 @@ fun FormaPago(navController: NavController){
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
-                    text = "Total de la compra:",
+                    text = "Total de la compra: $totalCompra",
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = Color.Black,
