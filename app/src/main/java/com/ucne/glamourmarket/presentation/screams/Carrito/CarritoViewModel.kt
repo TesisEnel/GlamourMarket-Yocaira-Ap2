@@ -43,7 +43,6 @@ class CarritoViewModel @Inject constructor(
 ) : ViewModel() {
     var carrito by mutableStateOf(CarritoDTO())
     var producto by mutableStateOf(ProductoDTO())
-    var cantidadSeleccionada by mutableIntStateOf(1)
     var errorProductoYaEnCarrito by mutableStateOf(false)
     var productoAgregadoConExito by mutableStateOf(false)
 
@@ -93,7 +92,7 @@ class CarritoViewModel @Inject constructor(
         }
     }
 
-/*    fun cargarProductosEnCarritoPorUsuario(usuarioId: Int){
+    fun cargarProductosEnCarritoPorUsuario(usuarioId: Int){
         productosRepository.getProductosEnCarritoPorUsuario(usuarioId).onEach { result ->
             when(result){
                 is Resource.Loading -> {
@@ -111,7 +110,7 @@ class CarritoViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
-    }*/
+    }
 
     fun getProductoById(Id: Int){
         productosRepository.getProductoById(Id).onEach { result ->
@@ -135,14 +134,13 @@ class CarritoViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun agregarProductoACarrito(usuarioId: Int, productoId: Int) {
+    fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int) {
         viewModelScope.launch {
             val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
             errorProductoYaEnCarrito = existe
             if (!existe) {
-                carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidadSeleccionada)
+                carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
                 productoAgregadoConExito = true
-                cantidadSeleccionada = 1
             }
         }
     }

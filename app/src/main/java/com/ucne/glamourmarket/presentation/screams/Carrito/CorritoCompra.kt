@@ -1,5 +1,6 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
@@ -18,6 +19,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.ucne.glamourmarket.data.dto.ProductoDTO
 import com.ucne.glamourmarket.data.dto.ProductosEnCarritoDTO
 import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
@@ -61,13 +65,16 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
     val currentUser = usuarioViewModel.auth.currentUser
     val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
     val carritoState by carritoViewModel.ListProductosEnCarrito.collectAsStateWithLifecycle()
-    if(currentUser != null){
+    val productosEnCarritoState by carritoViewModel.ListProductos.collectAsStateWithLifecycle()
+
+    if (currentUser != null) {
         val usuarioActual = usuarioState.usuarios.singleOrNull {
             it.email == currentUser.email
         }
 
         if (usuarioActual != null) {
             usuarioActual.id?.let { carritoViewModel.cargarProductosPorCarrito(it) }
+            usuarioActual.id?.let { carritoViewModel.cargarProductosEnCarritoPorUsuario(it) }
 
             Column(
                 modifier = Modifier
@@ -104,9 +111,25 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
                             .weight(1f)
                     ) {
                         items(carritoState.ProductosEnCarrito) { productoEnCarrito ->
+                            val producto = productosEnCarritoState.productos.firstOrNull { it.id == productoEnCarrito.productoId }
+                            if (producto != null) {
                                 ProductoCarrito(
-                                    productoEnCarrito
+                                    productoEnCarrito = productoEnCarrito,
+                                    producto = producto
                                 )
+                            }
+                        }
+                    }
+
+                    // Calcular el total
+                    val total = carritoState.ProductosEnCarrito.sumOf { productoEnCarrito ->
+                        val producto = productosEnCarritoState.productos.firstOrNull { it.id == productoEnCarrito.productoId }
+                        if (producto != null) {
+                            productoEnCarrito.cantidad?.let { cantidad ->
+                                cantidad * producto.precio
+                            } ?: 0.0
+                        } else {
+                            0.0
                         }
                     }
 
@@ -116,7 +139,7 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Total: $500",
+                            text = "Total: $$total",
                             style = TextStyle(
                                 fontSize = 18.sp,
                                 color = Color.Black,
@@ -148,155 +171,130 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
                 }
             }
         }
-
     }
 }
-
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductoCarrito(
     productoEnCarrito: ProductosEnCarritoDTO,
+    producto: ProductoDTO,
     additionalInfo: String? = null,
     usuarioViewModel: LoginViewModel = hiltViewModel(),
     carritoViewModel: CarritoViewModel = hiltViewModel()
 ) {
-    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
-    val currentUser = usuarioViewModel.auth.currentUser
-
-    productoEnCarrito.productoId?.let { carritoViewModel.getProductoById(it) }
-
-
-
-    if(currentUser != null){
-        val usuarioActual = usuarioState.usuarios.singleOrNull {
-            it.email == currentUser.email
-        }
-
-        if(usuarioActual != null) {
-            Card(
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable { },
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(model = producto.imagen),
+                contentDescription = "Producto",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clickable { },
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
-                shape = RoundedCornerShape(8.dp)
+                    .size(150.dp)
+                    .background(Color.LightGray),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = carritoViewModel.producto.imagen),
-                        contentDescription = "Producto",
-                        modifier = Modifier
-                            .size(150.dp)
-                            .background(Color.LightGray),
-                        contentScale = ContentScale.Crop
+                Text(
+                    text = producto.nombre,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ) {
-                        Text(
-                            text = carritoViewModel.producto.nombre,
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Existencia: ${producto.existencia}",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+                additionalInfo?.let {
+                    Text(
+                        text = it,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Existencia: ${carritoViewModel.producto.existencia}",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        )
-                        additionalInfo?.let {
-                            Text(
-                                text = it,
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal
-                                )
-                            )
+                    )
+                }
+                Text(
+                    text = "Precio: ${producto.precio}",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+                OutlinedTextField(
+                    value = productoEnCarrito.cantidad.toString(),
+                    onValueChange = {
+                        val newValue = it.toIntOrNull()
+                        if (newValue != null) {
+                            productoEnCarrito.cantidad
                         }
-                        Text(
-                            text = "Precio: ${carritoViewModel.producto.precio}",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        )
-                        OutlinedTextField(
-                            value = productoEnCarrito.cantidad.toString(),
-                            onValueChange = {
-                                val newValue = it.toIntOrNull()
-                                if (newValue != null) {
-                                    productoEnCarrito.cantidad
-                                }
-                            },
-                            label = { Text("Cantidad") },
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    },
+                    label = { Text("Cantidad") },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                        Button(
-                            onClick = {
-                                usuarioActual.id?.let {
-                                    carritoViewModel.producto.id?.let { it1 ->
-                                        carritoViewModel.eliminarProductoACarrito(
-                                            it, it1
-                                        )
-                                    }
-                                }
-                            },
-                            Modifier
-                                .fillMaxWidth()
-                                .height(35.dp),
-                            shape = RoundedCornerShape(size = 10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFFD08A),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Editar",
-                                color = Color.Black,
-                                fontSize = 12.sp
-                            )
+                Button(
+                    onClick = {},
+                    Modifier
+                        .fillMaxWidth()
+                        .height(35.dp),
+                    shape = RoundedCornerShape(size = 10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFD08A),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Editar",
+                        color = Color.Black,
+                        fontSize = 12.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        val usuarioActual = usuarioViewModel.uiState.value.usuarios.singleOrNull {
+                            it.email == usuarioViewModel.auth.currentUser?.email
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Button(
-                            onClick = {
-                                usuarioActual.id?.let {
-                                    carritoViewModel.producto.id?.let { it1 ->
-                                        carritoViewModel.eliminarProductoACarrito(
-                                            it, it1
-                                        )
-                                    }
-                                }
-                            },
-                            Modifier
-                                .fillMaxWidth()
-                                .height(35.dp),
-                            shape = RoundedCornerShape(size = 10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFD9FC3),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text(
-                                text = "Eliminar",
-                                color = Color.Black,
-                                fontSize = 12.sp
-                            )
+                        usuarioActual?.id?.let {
+                            carritoViewModel.eliminarProductoACarrito(it, producto.id!!)
                         }
-                    }
+                    },
+                    Modifier
+                        .fillMaxWidth()
+                        .height(35.dp),
+                    shape = RoundedCornerShape(size = 10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFD9FC3),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Eliminar",
+                        color = Color.Black,
+                        fontSize = 12.sp
+                    )
                 }
             }
         }

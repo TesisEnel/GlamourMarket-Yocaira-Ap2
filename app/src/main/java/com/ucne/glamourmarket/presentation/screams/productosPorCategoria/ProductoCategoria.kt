@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -106,7 +108,7 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController, carr
     }
 }
 
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint("SuspiciousIndentation", "UnrememberedMutableState")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductCard(
@@ -121,6 +123,7 @@ fun ProductCard(
 ) {
     // Recolectar el estado del usuario
     val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    var cantidad by mutableStateOf(1)
 
     // Obtener el usuario actual de Firebase
     val currentUser = usuarioViewModel.auth.currentUser
@@ -190,11 +193,11 @@ fun ProductCard(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedTextField(
-                            value = carritoViewModel.cantidadSeleccionada.toString(),
+                            value = cantidad.toString(),
                             onValueChange = {
                                 val newValue = it.toIntOrNull()
                                 if (newValue != null) {
-                                    carritoViewModel.cantidadSeleccionada = newValue
+                                    cantidad = newValue
                                 }
                             },
                             label = { Text("Cantidad") },
@@ -208,8 +211,9 @@ fun ProductCard(
                         Button(
                             onClick = {
                                 // Asegurarse de que el usuario actual no sea nulo
-                                if (usuarioActual?.id != null) {
-                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId)
+                                if (usuarioActual.id != null) {
+                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, cantidad)
+                                    cantidad = 1
                                 }
                             },
                             Modifier
