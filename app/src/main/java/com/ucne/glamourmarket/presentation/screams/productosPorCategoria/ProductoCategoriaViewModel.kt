@@ -32,12 +32,6 @@ class ProductoCategoriaViewModel @Inject constructor(
     private val productosRepository: ProductosRepository,
 ) : ViewModel() {
     var id by mutableIntStateOf(0)
-    var nombre by mutableStateOf("")
-    var categoria by mutableStateOf("")
-    var imagen by mutableStateOf("")
-    var precio by mutableDoubleStateOf(0.0)
-    var existencia by mutableIntStateOf(0)
-    var impuesto by mutableIntStateOf(0)
 
     private val _ListProductos = MutableStateFlow(ProductoListState())
     val ListProductos: StateFlow<ProductoListState> = _ListProductos.asStateFlow()

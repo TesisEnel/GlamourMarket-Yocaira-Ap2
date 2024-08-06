@@ -1,6 +1,6 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
-import android.annotation.SuppressLint
+
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
