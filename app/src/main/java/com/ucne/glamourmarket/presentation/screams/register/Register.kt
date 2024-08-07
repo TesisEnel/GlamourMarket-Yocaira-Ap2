@@ -6,18 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
@@ -51,33 +49,32 @@ import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.presentation.navigation.Destination
 import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
+import com.ucne.glamourmarket.presentation.screams.register.RegisterViewModel
 import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = hiltViewModel(), loginViewModel: LoginViewModel = hiltViewModel()) {
+    val usuarioState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .background(Color(0xFFFD9FC3)),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-
+            verticalArrangement = Arrangement.Center
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logoapp),
                 contentDescription = "Logo",
                 modifier = Modifier
-                    .height(350.dp)
+                    .height(250.dp)
                     .width(400.dp)
                     .align(Alignment.CenterHorizontally)
             )
@@ -102,7 +99,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "Inicio de sesión",
+                            text = "Registro",
                             style = TextStyle(
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
@@ -114,9 +111,28 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
+                        value = viewModel.nickname,
+                        onValueChange = { viewModel.nickname = it},
+                        label = { Text("Nickname") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (!viewModel.nicknameError) {
+                        Text(text = "El campo nickname está vacío", color = Color.Red)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
                         value = viewModel.email,
-                        onValueChange = { viewModel.email = it },
-                        label = { Text("Correo") },
+                        onValueChange = { viewModel.email = it},
+                        label = { Text("Correo Electrónico") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
@@ -134,7 +150,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
 
                     OutlinedTextField(
                         value = viewModel.password,
-                        onValueChange = { viewModel.password = it },
+                        onValueChange = { viewModel.password = it},
                         label = { Text("Contraseña") },
                         leadingIcon = {
                             Icon(
@@ -149,33 +165,27 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                     if (!viewModel.passwordError) {
                         Text(text = "El campo contraseña está vacío", color = Color.Red)
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        TextButton(onClick = { navController.navigate(Destination.RegistroUsuario.route) }) {
-                            Text("Regístrate")
-                        }
-
-                        TextButton(onClick = { /* TODO */ }) {
-                            Text("¿Has olvidado tu contraseña?")
-                        }
+                    if (!viewModel.passwordLengthError) {
+                        Text(text = "El campo contraseña debe tener 6 o mas digitos", color = Color.Red)
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
 
                     Button(
                         onClick = {
                             keyboardController?.hide()
-                            if (viewModel.ValidarLogin()) {
-                                viewModel.singInWithEmailAndPassword(viewModel.email, viewModel.password) {
-                                    navController.navigate(Destination.Home.route)
+                            if(viewModel.ValidarRegistro()){
+                                val usuarioExiste = usuarioState.usuarios.any {
+                                    it.email == viewModel.email || it.nickName == viewModel.nickname
                                 }
-                            } else {
-                                viewModel.loginError = true
+                                if(!usuarioExiste){
+                                    viewModel.send()
+                                    viewModel.createUserWithEmailAndPassword(viewModel.email, viewModel.password){
+                                        navController.navigate(Destination.Login.route)
+                                    }
+                                } else {
+                                    viewModel.registerError = true
+                                }
                             }
                         },
                         Modifier
@@ -188,7 +198,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                         )
                     ) {
                         Text(
-                            text = "Inicio de sesión",
+                            text = "Registrar",
                             color = Color.Black,
                             fontSize = 18.sp
                         )
@@ -197,11 +207,11 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
             }
         }
 
-        if (viewModel.loginError) {
+        if (viewModel.registerError) {
             Snackbar(
                 action = {
                     TextButton(
-                        onClick = { viewModel.loginError = false },
+                        onClick = { viewModel.registerError = false },
                         colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                     ) {
                         Text(text = "OK")
@@ -210,15 +220,14 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = hiltVi
                 modifier = Modifier.padding(8.dp)
             ) {
                 Text(
-                    text = "Las credenciales no están registradas.",
+                    text = "Las credenciales no son correctas o el email ya esta registrado",
                     color = Color.White
                 )
             }
             LaunchedEffect(Unit) {
-                delay(10000)
-                viewModel.loginError = false
+                delay(5000)
+                viewModel.registerError = false
             }
         }
     }
 }
-

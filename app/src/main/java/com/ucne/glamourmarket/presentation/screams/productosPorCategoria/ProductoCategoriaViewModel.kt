@@ -17,48 +17,43 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ProductoCategoriaListState(
+data class ProductoListState(
     val isLoading: Boolean = false,
     val productos: List<ProductoDTO> = emptyList(),
     val producto: ProductoDTO? = null,
     val error: String = ""
 )
+
 @HiltViewModel
 class ProductoCategoriaViewModel @Inject constructor(
-    private val productosRepository: ProductosRepository
+    private val productosRepository: ProductosRepository,
 ) : ViewModel() {
     var id by mutableIntStateOf(0)
-    var nombre by mutableStateOf("")
-    var categoria by mutableStateOf("")
-    var imagen by mutableStateOf("")
-    var precio by mutableDoubleStateOf(0.0);
-    var existencia by mutableIntStateOf(0)
-    var impuesto by mutableIntStateOf(0)
 
-    private val _ListProductosPorCategoria = MutableStateFlow(ProductoCategoriaListState())
-    val ListProductosPorCategoria: StateFlow<ProductoCategoriaListState> = _ListProductosPorCategoria.asStateFlow()
+    private val _ListProductos = MutableStateFlow(ProductoListState())
+    val ListProductos: StateFlow<ProductoListState> = _ListProductos.asStateFlow()
 
     fun cargarProductosPorCategoria(categoriaSeleccionada: String){
         productosRepository.getProductosByCategoria(categoriaSeleccionada).onEach { result ->
             when(result){
                 is Resource.Loading -> {
-                    _ListProductosPorCategoria.update { it.copy(isLoading = true) }
+                    _ListProductos.update { it.copy(isLoading = true) }
                 }
 
                 is Resource.Success -> {
-                    _ListProductosPorCategoria.update { it.copy(productos = result.data ?: emptyList()) }
+                    _ListProductos.update { it.copy(productos = result.data ?: emptyList()) }
 
                 }
 
                 is Resource.Error -> {
-                    _ListProductosPorCategoria.update { it.copy(error = result.message ?: "Error desconocido") }
+                    _ListProductos.update { it.copy(error = result.message ?: "Error desconocido") }
                 }
                 else -> {}
             }
 
         }.launchIn(viewModelScope)
     }
-
 }

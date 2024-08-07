@@ -36,24 +36,24 @@ class LoginViewModel @Inject constructor(
     private val usuariosRepository: UsuariosRepository
 ) : ViewModel() {
     var id by mutableIntStateOf(0)
-    var nickname by mutableStateOf("")
     var email by mutableStateOf("")
     var password by mutableStateOf("")
 
-    var nicknameError by mutableStateOf(true)
     var emailError by mutableStateOf(true)
     var passwordError by mutableStateOf(true)
 
     var loginError by mutableStateOf(false)
-    var registerError by mutableStateOf(false)
     var loginErrorMessage by mutableStateOf("")
 
     val auth: FirebaseAuth = Firebase.auth
-    private val _loading = mutableStateOf(false)
+
+    private fun isEmailValid(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
 
     fun ValidarLogin(): Boolean {
 
-        emailError = email.isNotEmpty()
+        emailError = email.isNotEmpty() && isEmailValid(email)
         passwordError = password.isNotEmpty()
 
         return emailError && passwordError
@@ -61,12 +61,6 @@ class LoginViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(UsuarioListState())
     val uiState: StateFlow<UsuarioListState> = _uiState.asStateFlow()
-
-    val usuarios: StateFlow<Resource<List<UsuarioDTO>>> = usuariosRepository.getUsuarios().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = Resource.Loading()
-    )
 
     fun singInWithEmailAndPassword(correo: String, clave: String, home: () -> Unit) {
         viewModelScope.launch {
@@ -90,23 +84,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun createUserWithEmailAndPassword(correo: String, clave:String, home: () -> Unit){
-        if(_loading.value == false){
-            _loading.value = true
-            val authNewUser = FirebaseAuth.getInstance()
-            authNewUser.createUserWithEmailAndPassword(correo, clave)
-                .addOnCompleteListener { task ->
-                    if(task.isSuccessful){
-                        Log.d("Se ejecuto el register", "Usuario creado con éxito: ${task.result?.user?.uid}")
-                        authNewUser.signOut()
-                        home()
-                    }else{
-                        Log.d("Se ejecuto el register", "createUserWithEmailAndPassword: ${task.exception?.message}")
-                    }
-                    _loading.value = false
-                }
-        }
-    }
     fun singOut(login: () -> Unit){
         Firebase.auth.signOut()
         login()
@@ -134,24 +111,5 @@ class LoginViewModel @Inject constructor(
                 else -> {}
             }
         }.launchIn(viewModelScope)
-    }
-
-    fun send() {
-        viewModelScope.launch {
-            val usuario = UsuarioDTO(
-                nickName = nickname,
-                email = email,
-                password = password
-            )
-            usuariosRepository.registrarUsuarios(usuario)
-            clear()
-            cargar()
-        }
-    }
-
-    fun clear(){
-        nickname = ""
-        email = ""
-        password = ""
     }
 }

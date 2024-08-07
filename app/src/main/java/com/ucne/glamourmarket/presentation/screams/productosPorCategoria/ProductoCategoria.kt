@@ -1,5 +1,8 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,84 +20,54 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.ucne.glamourmarket.R
 import com.ucne.glamourmarket.data.dto.ProductoDTO
-import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.components.Header
+import com.ucne.glamourmarket.presentation.components.SearchBar
+import com.ucne.glamourmarket.presentation.components.SnackbarErrorProductoYaEnCarrito
+import com.ucne.glamourmarket.presentation.components.SnackbarProductoAgregadoConExito
 import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
+import com.ucne.glamourmarket.presentation.screams.Carrito.CarritoViewModel
 import com.ucne.glamourmarket.presentation.screams.productosPorCategoria.ProductoCategoriaViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
+
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun Header(navController: NavController, viewModel: LoginViewModel = hiltViewModel()) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.ExitToApp,
-            contentDescription = "Salir del usuario",
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { viewModel.singOut {
-                    navController.navigate(Destination.Login.route)
-                    }
-                }
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.logo_solo),
-            contentDescription = "Logo",
-            modifier = Modifier
-                .size(50.dp)
-                .clickable { navController.navigate(Destination.Home.route) }
-        )
-
-        Icon(
-            imageVector = Icons.Default.ShoppingCart,
-            contentDescription = "Cart",
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { navController.navigate(Destination.ProductosEnCarritoScreen.route) }
-        )
-
+fun ProductoCategoria(
+    navController: NavController,
+    viewModel: ProductoCategoriaViewModel = hiltViewModel(),
+    categoriaSeleccionada: String,
+) {
+    LaunchedEffect(categoriaSeleccionada) {
+        viewModel.cargarProductosPorCategoria(categoriaSeleccionada)
     }
-}
+    val listaProductosByCategoria by viewModel.ListProductos.collectAsStateWithLifecycle()
 
-@Composable
-fun ProductoCategoria(navController: NavController, viewModel: ProductoCategoriaViewModel = hiltViewModel(), categoriaSeleccionada: String) {
-    viewModel.cargarProductosPorCategoria(categoriaSeleccionada)
-    val listaProductosByCategoria by viewModel.ListProductosPorCategoria.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,151 +80,187 @@ fun ProductoCategoria(navController: NavController, viewModel: ProductoCategoria
         ProductList(listaProductosByCategoria.productos, navController)
     }
 }
-
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun ProductList(productos: List<ProductoDTO>, navController: NavController) {
+fun ProductList(productos: List<ProductoDTO>, navController: NavController, carritoViewModel: CarritoViewModel = hiltViewModel()) {
+    var searchQuery by remember { mutableStateOf("") }
+    val productosFiltrados = productos.filter {
+        it.nombre.contains(searchQuery, ignoreCase = true)
+    }
+
+    SnackbarErrorProductoYaEnCarrito()
+    SnackbarProductoAgregadoConExito()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFFFFF))
             .padding(8.dp)
     ) {
-        SearchBar()
+        SearchBar(searchQuery) { newText -> searchQuery = newText }
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(productos) { producto ->
-                ProductCard(
-                    imageUrl = producto.imagen,
-                    name = producto.nombre,
-                    description = producto.categoria,
-                    price = producto.precio.toString()
-                )
+            items(productosFiltrados) { producto ->
+                producto.id?.let {
+                    ProductCard(
+                        productoId = it,
+                        imageUrl = producto.imagen,
+                        name = producto.nombre,
+                        stock = producto.existencia.toString(),
+                        price = producto.precio.toString()
+                    )
+                }
             }
         }
     }
 }
 
-@Composable
-fun SearchBar() {
-    OutlinedTextField(
-        value = "",
-        onValueChange = {},
-        label = { Text("Buscar") },
-        trailingIcon = {
-            IconButton(onClick = { /* Acción al hacer clic */ }) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Buscar",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    )
-}
-
+@SuppressLint("SuspiciousIndentation", "UnrememberedMutableState")
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductCard(
+    productoId: Int,
     imageUrl: String,
     name: String,
-    description: String,
+    stock: String,
     price: String,
-    additionalInfo: String? = null
+    additionalInfo: String? = null,
+    carritoViewModel: CarritoViewModel = hiltViewModel(),
+    usuarioViewModel: LoginViewModel = hiltViewModel()
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable { /* Acción al hacer clic */ },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(imageUrl),
-                contentDescription = "Producto",
+    // Recolectar el estado del usuario
+    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    var cantidad by mutableStateOf(1)
+
+    // Obtener el usuario actual de Firebase
+    val currentUser = usuarioViewModel.auth.currentUser
+
+    // Verificar si el usuario está autenticado
+    if (currentUser != null) {
+        // Buscar el usuario actual en el estado
+        val usuarioActual = usuarioState.usuarios.singleOrNull {
+            it.email == currentUser.email
+        }
+
+        if(usuarioActual != null) {
+            Card(
                 modifier = Modifier
-                    .size(150.dp)
-                    .background(Color.LightGray),
-                contentScale = ContentScale.Crop // O ContentScale.Fit según tu necesidad
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(
-                modifier = Modifier.align(Alignment.CenterVertically)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clickable { /* Acción al hacer clic */ },
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6F2)),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text(
-                    text = name,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                Row(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUrl),
+                        contentDescription = "Producto",
+                        modifier = Modifier
+                            .size(150.dp)
+                            .background(Color.LightGray),
+                        contentScale = ContentScale.Crop
                     )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = description,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-                additionalInfo?.let {
-                    Text(
-                        text = it,
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Text(
+                            text = name,
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
-                }
-                Text(
-                    text = "Precio: $price",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { /* Acción al hacer clic */ },
-                    Modifier
-                        .fillMaxWidth()
-                        .height(35.dp),
-                    shape = RoundedCornerShape(size = 10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFD9FC3),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(
-                        text = "Agregar al carrito",
-                        color = Color.Black,
-                        fontSize = 12.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { /* Acción al hacer clic */ },
-                    Modifier
-                        .fillMaxWidth()
-                        .height(35.dp),
-                    shape = RoundedCornerShape(size = 10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFD08A),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(
-                        text = "Comprar ahora",
-                        color = Color.Black,
-                        fontSize = 12.sp
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Existencia: $stock",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        )
+                        additionalInfo?.let {
+                            Text(
+                                text = it,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            )
+                        }
+                        Text(
+                            text = "Precio: $price",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = cantidad.toString(),
+                            onValueChange = {
+                                val newValue = it.toIntOrNull()
+                                if (newValue != null) {
+                                    cantidad = newValue
+                                }
+                            },
+                            label = { Text("Cantidad") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number,imeAction = ImeAction.Next),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Button(
+                            onClick = {
+                                // Asegurarse de que el usuario actual no sea nulo
+                                if (usuarioActual.id != null) {
+                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, cantidad, false)
+                                    cantidad = 1
+                                }
+                            },
+                            Modifier
+                                .fillMaxWidth()
+                                .height(35.dp),
+                            shape = RoundedCornerShape(size = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFD9FC3),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = "Agregar al carrito",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { /* Acción al hacer clic */ },
+                            Modifier
+                                .fillMaxWidth()
+                                .height(35.dp),
+                            shape = RoundedCornerShape(size = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD08A),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = "Comprar ahora",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
             }
         }
+    } else {
+        println("No hay usuario autenticado.")
     }
 }

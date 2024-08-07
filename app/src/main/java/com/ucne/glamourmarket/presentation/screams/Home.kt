@@ -9,6 +9,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,9 +20,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.R
+import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 
 @Composable
 fun HomeScream(navController: NavController) {
@@ -40,29 +45,39 @@ fun HomeScream(navController: NavController) {
 
 
 @Composable
-fun Content(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .background(Color(0xFFFFFFFF))
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        Text(
-            text = "Categoria",
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                fontFamily = FontFamily.SansSerif
-            ),
-            modifier = Modifier.padding(16.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        ProductCardHome(imageResource = R.drawable.perfume, categoria = "Perfumes", navController)
-        Spacer(modifier = Modifier.height(16.dp))
-        ProductCardHome(imageResource = R.drawable.maquillaje, categoria = "Maquillaje", navController)
-        Spacer(modifier = Modifier.height(16.dp))
-        ProductCardHome(imageResource = R.drawable.accesorios, categoria = "Accesorios", navController)
+fun Content(navController: NavController, usuarioViewModel: LoginViewModel = hiltViewModel()) {
+    val currentUser = usuarioViewModel.auth.currentUser
+    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+    if(currentUser != null) {
+        val usuarioActual = usuarioState.usuarios.singleOrNull {
+            it.email == currentUser.email
+        }
+
+        Column(
+            modifier = Modifier
+                .background(Color(0xFFFFFFFF))
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            if (usuarioActual != null) {
+                Text(
+                    text = "Categoria - Bienvenido: ${usuarioActual.nickName}",
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        fontFamily = FontFamily.SansSerif
+                    ),
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            ProductCardHome(imageResource = R.drawable.perfume, categoria = "Perfumes", navController)
+            Spacer(modifier = Modifier.height(16.dp))
+            ProductCardHome(imageResource = R.drawable.maquillaje, categoria = "Maquillaje", navController)
+            Spacer(modifier = Modifier.height(16.dp))
+            ProductCardHome(imageResource = R.drawable.accesorios, categoria = "Accesorios", navController)
+        }
     }
 }
 

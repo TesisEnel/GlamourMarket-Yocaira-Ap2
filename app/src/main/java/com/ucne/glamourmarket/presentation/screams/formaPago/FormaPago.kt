@@ -1,5 +1,7 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,12 +32,48 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.Carrito.CarritoViewModel
+import com.ucne.glamourmarket.presentation.screams.formaPago.FormaPagoViewModel
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun FormaPago(navController: NavController){
+fun FormaPago(
+    navController: NavController,
+    totalCompra: String,
+    formaPagoViewModel: FormaPagoViewModel = hiltViewModel(),
+    carritoViewModel: CarritoViewModel = hiltViewModel(),
+    usuarioViewModel: LoginViewModel = hiltViewModel()) {
+
+    //Obtener id del carrito
+    val currentUser = usuarioViewModel.auth.currentUser
+    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+
+    if (currentUser != null) {
+        val usuarioActual = usuarioState.usuarios.singleOrNull {
+            it.email == currentUser.email
+        }
+
+        if (usuarioActual != null) {
+            usuarioActual.id?.let { carritoViewModel.getCarritoByUsuarioId(it) }
+        }
+    }
+    val nombreTarjeta by formaPagoViewModel.nombreTarjeta
+    val numeroTarjeta by formaPagoViewModel.numeroTarjeta
+    val cvc by formaPagoViewModel.cvc
+    val mesExpiracion by formaPagoViewModel.mesExpiracion
+    val anioExpiracion by formaPagoViewModel.anioExpiracion
+
+    val nombreTarjetaError by formaPagoViewModel.nombreTarjetaError
+    val numeroTarjetaError by formaPagoViewModel.numeroTarjetaError
+    val cvcError by formaPagoViewModel.cvcError
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,7 +85,7 @@ fun FormaPago(navController: NavController){
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
-                .fillMaxSize()  // Asegúrate de que la columna ocupe todo el espacio disponible
+                .fillMaxSize()
                 .background(Color(0xFFFFFFFF))
                 .padding(8.dp)
         ) {
@@ -63,35 +101,84 @@ fun FormaPago(navController: NavController){
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = nombreTarjeta,
+                onValueChange = formaPagoViewModel::onNombreTarjetaChange,
                 label = { Text("Nombre de la tarjeta") },
+                isError = nombreTarjetaError != null,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
+            if (nombreTarjetaError != null) {
+                Text(
+                    text = nombreTarjetaError!!,
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = numeroTarjeta,
+                onValueChange = formaPagoViewModel::onNumeroTarjetaChange,
                 label = { Text("Número de la tarjeta") },
+                isError = numeroTarjetaError != null,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
+            if (numeroTarjetaError != null) {
+                Text(
+                    text = numeroTarjetaError!!,
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
-            PreviewExpirationDateSelector()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = mesExpiracion,
+                    onValueChange = formaPagoViewModel::onMesExpiracionChange,
+                    label = { Text("Mes de expiración") },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    modifier = Modifier
+                        .width(100.dp)
+                )
+
+                OutlinedTextField(
+                    value = anioExpiracion,
+                    onValueChange = formaPagoViewModel::onAnioExpiracionChange,
+                    label = { Text("Año de expiración") },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    modifier = Modifier
+                        .width(100.dp)
+                )
+            }
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = cvc,
+                onValueChange = formaPagoViewModel::onCvcChange,
                 label = { Text("CVC") },
+                isError = cvcError != null,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 modifier = Modifier
                     .width(150.dp)
                     .padding(horizontal = 16.dp)
             )
+            if (cvcError != null) {
+                Text(
+                    text = cvcError!!,
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
@@ -106,31 +193,12 @@ fun FormaPago(navController: NavController){
             )
             Column(
                 modifier = Modifier
-                    .fillMaxSize()  // Asegúrate de que la columna ocupe todo el espacio disponible
+                    .fillMaxSize()
                     .background(Color(0xFFFFFFFF))
                     .padding(16.dp)
-            )
-            {
+            ) {
                 Text(
-                    text = "Producto:",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                    ),
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Text(
-                    text = "Itbis:",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                    ),
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Text(
-                    text = "Total de la compra:",
+                    text = "Total de la compra: $$totalCompra",
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = Color.Black,
@@ -140,7 +208,10 @@ fun FormaPago(navController: NavController){
 
                 Button(
                     onClick = {
-                        navController.navigate(Destination.Home.route)
+                        if (formaPagoViewModel.validarCampos()) {
+                            carritoViewModel.carrito.id?.let { formaPagoViewModel.realizarCompra(it) }
+                            navController.navigate(Destination.Home.route)
+                        }
                     },
                     Modifier
                         .fillMaxWidth()
@@ -158,110 +229,6 @@ fun FormaPago(navController: NavController){
                     )
                 }
             }
-
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ExpirationDateSelector() {
-    // Estado para el mes
-    var monthExpanded by remember { mutableStateOf(false) }
-    var selectedMonth by remember { mutableStateOf("MM") }
-    val months = listOf("01 - Enero", "02 - Febrero", "03 - Marzo", "04 - Abril", "05 - Mayo", "06 - Junio",
-        "07 - Julio", "08 - Agosto", "09 - Septiembre", "10 - Octubre", "11 - Noviembre", "12 - Diciembre")
-
-    // Estado para el año
-    var yearExpanded by remember { mutableStateOf(false) }
-    var selectedYear by remember { mutableStateOf("AAAA") }
-    val years = listOf("2024", "2025", "2026", "2027", "2028", "2029", "2030")
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Expiración",
-            style = TextStyle(
-                fontSize = 16.sp,
-                color = Color.Black,
-                fontFamily = FontFamily.SansSerif
-            ),
-            modifier = Modifier.padding(end = 8.dp)
-        )
-
-        // Selector de Mes
-        ExposedDropdownMenuBox(
-            expanded = monthExpanded,
-            onExpandedChange = { monthExpanded = !monthExpanded }
-        ) {
-            OutlinedTextField(
-                readOnly = true,
-                value = selectedMonth,
-                onValueChange = {},
-                trailingIcon = {
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                },
-                modifier = Modifier
-                    .width(125.dp)
-                    .clickable { monthExpanded = true }
-            )
-            ExposedDropdownMenu(
-                expanded = monthExpanded,
-                onDismissRequest = { monthExpanded = false }
-            ) {
-                months.forEach { month ->
-                    DropdownMenuItem(
-                        text = { Text(month) },
-                        onClick = {
-                            selectedMonth = month
-                            monthExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        // Selector de Año
-        ExposedDropdownMenuBox(
-            expanded = yearExpanded,
-            onExpandedChange = { yearExpanded = !yearExpanded }
-        ) {
-            OutlinedTextField(
-                readOnly = true,
-                value = selectedYear,
-                onValueChange = {},
-                trailingIcon = {
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                },
-                modifier = Modifier
-                    .width(120.dp)
-                    .clickable { yearExpanded = true }
-            )
-            ExposedDropdownMenu(
-                expanded = yearExpanded,
-                onDismissRequest = { yearExpanded = false }
-            ) {
-                years.forEach { year ->
-                    DropdownMenuItem(
-                        text = { Text(year) },
-                        onClick = {
-                            selectedYear = year
-                            yearExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewExpirationDateSelector() {
-    ExpirationDateSelector()
 }

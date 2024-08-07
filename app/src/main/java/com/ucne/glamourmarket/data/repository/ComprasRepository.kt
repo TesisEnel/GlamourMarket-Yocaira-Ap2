@@ -13,19 +13,4 @@ class ComprasRepository @Inject constructor(
     private val api: GlamourAPI
 ) {
     suspend fun comprarTodoEnCarrito(carritoId: Int) = api.comprarTodoEnCarrito(carritoId)
-
-    fun getComprasById(Id: Int): Flow<Resource<CompraDTO>> = flow {
-        try {
-            emit(Resource.Loading())
-
-            val carrito = api.getComprasById(Id)
-
-            emit(Resource.Success(carrito))
-        } catch (@SuppressLint("NewApi") e: HttpException) {
-            emit(Resource.Error(e.message ?: "Error HTTP"))
-        } catch (e: IOException) {
-
-            emit(Resource.Error(e.message ?: "verificar tu conexion a internet"))
-        }
-    }
 }
