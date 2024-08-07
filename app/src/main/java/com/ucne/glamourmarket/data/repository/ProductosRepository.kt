@@ -43,22 +43,4 @@ class ProductosRepository @Inject constructor(
             emit(Resource.Error(e.message ?: "verificar tu conexion a internet"))
         }
     }
-
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun getProductoById(id: Int): Flow<Resource<ProductoDTO>> = flow {
-        try {
-            emit(Resource.Loading())
-
-            val producto =
-                api.getProductoById(id)
-
-            emit(Resource.Success(producto))
-        } catch (e: HttpException) {
-            //error general HTTP
-            emit(Resource.Error(e.message ?: "Error HTTP GENERAL"))
-        } catch (e: IOException) {
-            //debe verificar tu conexion a internet
-            emit(Resource.Error(e.message ?: "verificar tu conexion a internet"))
-        }
-    }
 }

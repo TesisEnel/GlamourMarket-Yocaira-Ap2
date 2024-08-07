@@ -62,12 +62,6 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UsuarioListState())
     val uiState: StateFlow<UsuarioListState> = _uiState.asStateFlow()
 
-    val usuarios: StateFlow<Resource<List<UsuarioDTO>>> = usuariosRepository.getUsuarios().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = Resource.Loading()
-    )
-
     fun singInWithEmailAndPassword(correo: String, clave: String, home: () -> Unit) {
         viewModelScope.launch {
             try {

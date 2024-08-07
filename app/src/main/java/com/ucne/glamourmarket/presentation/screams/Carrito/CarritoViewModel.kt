@@ -42,7 +42,6 @@ class CarritoViewModel @Inject constructor(
     private val productosRepository: ProductosRepository
 ) : ViewModel() {
     var carrito by mutableStateOf(CarritoDTO())
-    var producto by mutableStateOf(ProductoDTO())
     var errorProductoYaEnCarrito by mutableStateOf(false)
     var productoAgregadoConExito by mutableStateOf(false)
 
@@ -109,17 +108,6 @@ class CarritoViewModel @Inject constructor(
                 else -> {}
             }
 
-        }.launchIn(viewModelScope)
-    }
-
-    fun getProductoById(Id: Int){
-        productosRepository.getProductoById(Id).onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    producto = result.data!!
-                }
-                else -> {}
-            }
         }.launchIn(viewModelScope)
     }
 

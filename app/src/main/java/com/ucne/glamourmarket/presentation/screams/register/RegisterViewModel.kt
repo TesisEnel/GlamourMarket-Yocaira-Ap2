@@ -41,8 +41,6 @@ class RegisterViewModel @Inject constructor(
         return nicknameError && emailError && passwordError && passwordLengthError
     }
 
-
-    val auth: FirebaseAuth = Firebase.auth
     private val _loading = mutableStateOf(false)
 
 
