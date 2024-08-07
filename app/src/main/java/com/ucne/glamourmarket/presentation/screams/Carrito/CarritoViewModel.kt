@@ -43,6 +43,7 @@ class CarritoViewModel @Inject constructor(
 ) : ViewModel() {
     var carrito by mutableStateOf(CarritoDTO())
     var errorProductoYaEnCarrito by mutableStateOf(false)
+    var errorCantidadExcedeExistencia by mutableStateOf(false)
     var productoAgregadoConExito by mutableStateOf(false)
 
     private val _ListProductos = MutableStateFlow(ProductoListState())
@@ -124,11 +125,39 @@ class CarritoViewModel @Inject constructor(
 
     fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int, editandoCarrito: Boolean) {
         viewModelScope.launch {
-            val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
-            errorProductoYaEnCarrito = existe
-            if (!existe || editandoCarrito) {
-                carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
-                productoAgregadoConExito = true
+            val producto = productosRepository.getProductoById(productoId)
+            val carrito = carritosRepository.getCarritoByIdUsuario(usuarioId)
+            var cantidadTotal = cantidad
+
+            carrito.collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        val productosEnCarrito = resource.data?.productosEnCarrito ?: emptyList()
+                        val productoEnCarrito = productosEnCarrito.find { it.productoId == productoId }
+                        cantidadTotal += productoEnCarrito?.cantidad ?: 0
+                    }
+                    else -> {}
+                }
+            }
+
+            producto.collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        val existencia = resource.data?.existencia ?: 0
+                        if (cantidadTotal > existencia) {
+                            errorCantidadExcedeExistencia = true
+                        } else {
+                            errorCantidadExcedeExistencia = false
+                            val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
+                            errorProductoYaEnCarrito = existe
+                            if (!existe || editandoCarrito) {
+                                carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
+                                productoAgregadoConExito = true
+                            }
+                        }
+                    }
+                    else -> {}
+                }
             }
         }
     }

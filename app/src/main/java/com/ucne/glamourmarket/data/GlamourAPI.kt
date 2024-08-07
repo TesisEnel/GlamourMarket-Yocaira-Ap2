@@ -29,6 +29,10 @@ interface GlamourAPI {
     @GET("api/Productos/ProductosEnCarritoPorUsuario")
     suspend fun getProductosEnCarritoPorUsuario(@Query("usuarioId") usuarioId:Int):List<ProductoDTO>
 
+    @GET("api/Productos/{id}")
+    suspend fun getProductoById(@Path("id") id: Int): ProductoDTO
+
+
     @PUT("api/Carritos/AgregarProductoACarrito")
     suspend fun agregarProductoACarrito(
         @Query("usuarioId") usuarioId: Int,
