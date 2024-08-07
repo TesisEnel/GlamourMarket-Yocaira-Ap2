@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +67,7 @@ fun ProductoCategoria(
         viewModel.cargarProductosPorCategoria(categoriaSeleccionada)
     }
     val listaProductosByCategoria by viewModel.ListProductos.collectAsStateWithLifecycle()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,6 +83,11 @@ fun ProductoCategoria(
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductList(productos: List<ProductoDTO>, navController: NavController, carritoViewModel: CarritoViewModel = hiltViewModel()) {
+    var searchQuery by remember { mutableStateOf("") }
+    val productosFiltrados = productos.filter {
+        it.nombre.contains(searchQuery, ignoreCase = true)
+    }
+
     SnackbarErrorProductoYaEnCarrito()
     SnackbarProductoAgregadoConExito()
 
@@ -90,10 +97,10 @@ fun ProductList(productos: List<ProductoDTO>, navController: NavController, carr
             .background(Color(0xFFFFFFFF))
             .padding(8.dp)
     ) {
-        SearchBar()
+        SearchBar(searchQuery) { newText -> searchQuery = newText }
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(productos) { producto ->
+            items(productosFiltrados) { producto ->
                 producto.id?.let {
                     ProductCard(
                         productoId = it,
