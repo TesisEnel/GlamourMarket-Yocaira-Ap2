@@ -2,8 +2,10 @@ package com.ucne.glamourmarket.presentation.screams.formaPago
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ucne.glamourmarket.data.repository.ComprasRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,4 +59,11 @@ class FormaPagoViewModel @Inject constructor(
 
         return isNombreValido && isNumeroValido && isCvcValido && isMesValido && isAnioValido
     }
+
+    fun realizarCompra(carritoId: Int) {
+        viewModelScope.launch {
+            comprasRepository.comprarTodoEnCarrito(carritoId)
+        }
+    }
+
 }

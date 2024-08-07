@@ -1,5 +1,7 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,14 +33,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ucne.glamourmarket.presentation.components.Header
 import com.ucne.glamourmarket.presentation.navigation.Destination
+import com.ucne.glamourmarket.presentation.screams.Carrito.CarritoViewModel
 import com.ucne.glamourmarket.presentation.screams.formaPago.FormaPagoViewModel
+import com.ucne.glamourmarket.presentation.screams.login.LoginViewModel
 
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun FormaPago(navController: NavController, totalCompra: String, formaPagoViewModel: FormaPagoViewModel = hiltViewModel()) {
+fun FormaPago(
+    navController: NavController,
+    totalCompra: String,
+    formaPagoViewModel: FormaPagoViewModel = hiltViewModel(),
+    carritoViewModel: CarritoViewModel = hiltViewModel(),
+    usuarioViewModel: LoginViewModel = hiltViewModel()) {
+
+    //Obtener id del carrito
+    val currentUser = usuarioViewModel.auth.currentUser
+    val usuarioState by usuarioViewModel.uiState.collectAsStateWithLifecycle()
+
+    if (currentUser != null) {
+        val usuarioActual = usuarioState.usuarios.singleOrNull {
+            it.email == currentUser.email
+        }
+
+        if (usuarioActual != null) {
+            usuarioActual.id?.let { carritoViewModel.getCarritoByUsuarioId(it) }
+        }
+    }
     val nombreTarjeta by formaPagoViewModel.nombreTarjeta
     val numeroTarjeta by formaPagoViewModel.numeroTarjeta
     val cvc by formaPagoViewModel.cvc
@@ -184,6 +209,7 @@ fun FormaPago(navController: NavController, totalCompra: String, formaPagoViewMo
                 Button(
                     onClick = {
                         if (formaPagoViewModel.validarCampos()) {
+                            carritoViewModel.carrito.id?.let { formaPagoViewModel.realizarCompra(it) }
                             navController.navigate(Destination.Home.route)
                         }
                     },
