@@ -28,3 +28,13 @@ La aplicación ofrece un catálogo de productos de belleza, que abarca categorí
 - **Kotlin**
 - **Android Studio**
 - **Firebase**
+
+## Imagenes
+
+![image](https://github.com/user-attachments/assets/b747a430-c57f-4803-957e-af1f57783f55)
+![image](https://github.com/user-attachments/assets/efeac235-2533-447a-a428-6f4d2f95b1bc)
+![image](https://github.com/user-attachments/assets/cb7179a1-3ba4-441b-b32a-2773a0c916af)
+![image](https://github.com/user-attachments/assets/8a3dd4fc-57aa-4b10-ac44-72092c4fdb59)
+![image](https://github.com/user-attachments/assets/a3d72c5a-fd5a-4ed9-8af8-2a7fc7d93793)
+![image](https://github.com/user-attachments/assets/ba856362-46a7-4b4e-92db-d877429ab2cf)
+
