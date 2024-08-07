@@ -1,6 +1,7 @@
 package com.ucne.glamourmarket.ui.theme.screams
 
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
@@ -21,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -174,6 +177,7 @@ fun ListaProductoCarrito(navController: NavController, usuarioViewModel: LoginVi
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ProductoCarrito(
@@ -183,6 +187,9 @@ fun ProductoCarrito(
     usuarioViewModel: LoginViewModel = hiltViewModel(),
     carritoViewModel: CarritoViewModel = hiltViewModel()
 ) {
+    var isEditing by remember { mutableStateOf(false) }
+    var cantidad by mutableStateOf(productoEnCarrito.cantidad)
+    var cantidadASumar by remember { mutableIntStateOf(0) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,38 +245,58 @@ fun ProductoCarrito(
                     )
                 )
                 OutlinedTextField(
-                    value = productoEnCarrito.cantidad.toString(),
+                    value = if (isEditing) cantidadASumar.toString() else cantidad.toString(),
                     onValueChange = {
                         val newValue = it.toIntOrNull()
                         if (newValue != null) {
-                            productoEnCarrito.cantidad
+                            if (isEditing) {
+                                cantidadASumar = newValue
+                            } else {
+                                cantidad = newValue
+                            }
                         }
                     },
-                    label = { Text("Cantidad") },
+                    label = { Text(if (isEditing) "Cantidad a sumar" else "Cantidad") },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isEditing
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        if (isEditing) {
+                            // Lógica para guardar los cambios y agregar al carrito
+                            val usuarioActual = usuarioViewModel.uiState.value.usuarios.singleOrNull {
+                                it.email == usuarioViewModel.auth.currentUser?.email
+                            }
+                            usuarioActual?.id?.let { userId ->
+                                cantidadASumar.let { cantidadASumar ->
+                                    carritoViewModel.agregarProductoACarrito(userId, producto.id!!, cantidadASumar, true)
+                                    cantidad = cantidad?.plus(cantidadASumar) // Actualiza la cantidad en la UI
+                                    isEditing = false // Salir del modo de edición
+                                }
+                            }
+                        } else {
+                            isEditing = true // Entrar en modo de edición
+                        }
+                    },
                     Modifier
                         .fillMaxWidth()
                         .height(35.dp),
                     shape = RoundedCornerShape(size = 10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFD08A),
+                        containerColor = if (isEditing) Color(0xFF4CAF50) else Color(0xFFFFD08A),
                         contentColor = Color.White
                     )
                 ) {
                     Text(
-                        text = "Editar",
+                        text = if (isEditing) "Guardar" else "Editar", // Cambia el texto del botón
                         color = Color.Black,
                         fontSize = 12.sp
                     )
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(

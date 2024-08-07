@@ -122,11 +122,11 @@ class CarritoViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int) {
+    fun agregarProductoACarrito(usuarioId: Int, productoId: Int, cantidad: Int, editandoCarrito: Boolean) {
         viewModelScope.launch {
             val existe = validarSiYaExisteEnCarrito(usuarioId, productoId)
             errorProductoYaEnCarrito = existe
-            if (!existe) {
+            if (!existe || editandoCarrito) {
                 carritosRepository.agregarProductoACarrito(usuarioId, productoId, cantidad)
                 productoAgregadoConExito = true
             }

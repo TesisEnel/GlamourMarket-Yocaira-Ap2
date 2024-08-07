@@ -212,7 +212,7 @@ fun ProductCard(
                             onClick = {
                                 // Asegurarse de que el usuario actual no sea nulo
                                 if (usuarioActual.id != null) {
-                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, cantidad)
+                                    carritoViewModel.agregarProductoACarrito(usuarioActual.id, productoId, cantidad, false)
                                     cantidad = 1
                                 }
                             },
